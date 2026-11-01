@@ -1,0 +1,12 @@
+# Local Python environment
+.venv/
+
+# Generated Python cache files
+__pycache__/
+*.pyc
+
+# Local credentials and configuration
+.env
+
+# Private screenshots and generated data
+data/
