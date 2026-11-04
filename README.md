@@ -24,6 +24,15 @@ Place a PNG screenshot at data/sample.png, then run:
 
 Recognized text is printed in the terminal.
 
+## Scan multiple screenshots
+
+Place PNG or JPEG screenshots directly inside data/, then run:
+
+    python scan_folder.py
+
+The scanner prints each filename and its extracted text.
+If an image fails, it reports the error and continues with the others.
+
 ## Development setup
 
 Requires Python 3.11.
