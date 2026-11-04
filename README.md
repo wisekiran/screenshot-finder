@@ -9,7 +9,20 @@ and keyword search.
 
 ## Current status
 
-Initial project setup. Screenshot processing is not implemented yet.
+Extracts text from a local screenshot using RapidOCR and ONNX Runtime.
+Search and the web interface are not implemented yet.
+
+## Run the OCR demo
+
+Install dependencies in your activated virtual environment:
+
+    python -m pip install -r requirements.txt
+
+Place a PNG screenshot at data/sample.png, then run:
+
+    python ocr_demo.py
+
+Recognized text is printed in the terminal.
 
 ## Development setup
 
