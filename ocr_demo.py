@@ -2,16 +2,20 @@ from pathlib import Path
 
 from rapidocr import RapidOCR
 
-image_path = Path(__file__).parent / "data" / "sample.png"
+from ocr import extract_text
 
-if not image_path.is_file():
-    raise FileNotFoundError(f"Screenshot not found: {image_path}")
 
-engine = RapidOCR()
-result = engine(str(image_path))
+def main() -> None:
+    image_path = Path(__file__).parent / "data" / "sample.png"
+    engine = RapidOCR()
+    lines = extract_text(image_path, engine)
 
-if result.txts:
-    for text in result.txts:
-        print(text)
-else:
-    print("No text found in the image.")
+    if lines:
+        for line in lines:
+            print(line)
+    else:
+        print("No text was detected.")
+
+
+if __name__ == "__main__":
+    main()
