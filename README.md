@@ -33,6 +33,16 @@ Place PNG or JPEG screenshots directly inside data/, then run:
 The scanner prints each filename and its extracted text.
 If an image fails, it reports the error and continues with the others.
 
+## Local storage
+
+The folder scanner saves extracted text and absolute image paths
+in data/screenshots.db using SQLite.
+
+Scanning the same file path again updates its text and indexing time.
+Identical images at different paths are not yet deduplicated.
+
+The database and screenshots are excluded from Git.
+
 ## Development setup
 
 Requires Python 3.11.

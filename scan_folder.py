@@ -4,6 +4,8 @@ from rapidocr import RapidOCR
 
 from ocr import extract_text
 
+from storage import initialize_database, save_screenshot
+
 
 SUPPORTED_EXTENSIONS = {".png", ".jpg", ".jpeg"}
 
@@ -20,6 +22,7 @@ def main() -> None:
         print("No supported images found.")
         return
 
+    initialize_database()
     engine = RapidOCR()
 
     for image_path in image_paths:
@@ -27,9 +30,12 @@ def main() -> None:
 
         try:
             lines = extract_text(image_path, engine)
+            save_screenshot(image_path, lines)
         except Exception as error:
-            print(f"Could not process this image: {error}")
+            print(f"Could not process or save this image: {error}")
             continue
+
+        print("Saved to database.")
 
         if lines:
             print("\n".join(lines))
