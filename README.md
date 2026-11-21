@@ -43,6 +43,18 @@ Identical images at different paths are not yet deduplicated.
 
 The database and screenshots are excluded from Git.
 
+## Search screenshots
+
+After scanning your screenshots, run:
+
+    python search.py
+
+Enter a word or phrase to search the saved OCR text.
+Search ignores English letter case and returns matching image paths.
+Empty queries are rejected.
+
+This currently performs literal substring matching, not semantic search.
+
 ## Development setup
 
 Requires Python 3.11.

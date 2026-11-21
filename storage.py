@@ -37,3 +37,23 @@ def save_screenshot(image_path: Path, lines: list[str]) -> None:
                 """,
                 (file_path, extracted_text),
             )
+
+def search_screenshots(query: str) -> list[tuple[int, str]]:
+    """Find screenshots containing the query, ignoring letter case."""
+    query = query.strip()
+
+    if not query:
+        return []
+
+    with closing(sqlite3.connect(DATABASE_PATH)) as connection:
+        rows = connection.execute(
+            """
+            SELECT id, file_path
+            FROM screenshots
+            WHERE instr(lower(extracted_text), lower(?)) > 0
+            ORDER BY id
+            """,
+            (query,),
+        ).fetchall()
+
+    return rows
