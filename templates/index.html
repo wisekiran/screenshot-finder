@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screenshot Finder</title>
+</head>
+<body>
+    <h1>Screenshot Finder</h1>
+    <p>Find information buried in your screenshots.</p>
+
+    <form action="/import" method="post" enctype="multipart/form-data">
+        <label for="screenshots">Choose your screenshots folder:</label>
+
+        <input
+            id="screenshots"
+            name="screenshots"
+            type="file"
+            webkitdirectory
+            multiple
+            required
+        >
+
+        <button type="submit">Import screenshots</button>
+    </form>
+
+<p>Importing sends the files in your selected folder to this app.</p>
+
+    <p>
+        Your browser may ask you to confirm the folder selection.
+    </p>
+</body>
+</html>
