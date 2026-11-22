@@ -4,7 +4,13 @@ from rapidocr import RapidOCR
 
 from ocr import extract_text
 
-from storage import initialize_database, save_screenshot
+from storage import (
+    initialize_database,
+    is_screenshot_unchanged,
+    save_screenshot,
+)
+
+from fingerprints import calculate_file_hash
 
 
 SUPPORTED_EXTENSIONS = {".png", ".jpg", ".jpeg"}
@@ -29,8 +35,14 @@ def main() -> None:
         print(f"\n--- {image_path.name} ---")
 
         try:
+            file_hash = calculate_file_hash(image_path)
+
+            if is_screenshot_unchanged(image_path, file_hash):
+                print("Unchanged—skipping OCR.")
+                continue
+
             lines = extract_text(image_path, engine)
-            save_screenshot(image_path, lines)
+            save_screenshot(image_path, lines, file_hash)
         except Exception as error:
             print(f"Could not process or save this image: {error}")
             continue

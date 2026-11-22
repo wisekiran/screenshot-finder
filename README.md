@@ -55,6 +55,15 @@ Empty queries are rejected.
 
 This currently performs literal substring matching, not semantic search.
 
+## Skip unchanged screenshots
+
+The scanner stores a SHA-256 fingerprint for each image.
+If the same file path has the same fingerprint on a later scan,
+OCR is skipped.
+
+New or changed files are processed and saved.
+Identical files at different paths are still stored separately.
+
 ## Development setup
 
 Requires Python 3.11.
