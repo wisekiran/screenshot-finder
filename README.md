@@ -81,6 +81,24 @@ Activate it in Windows PowerShell:
 Private screenshots and generated data belong in the data/ folder,
 which is excluded from Git.
 
+## Local web interface
+
+Start the development server:
+
+python app.py
+
+Open http://127.0.0.1:5000 in your browser.
+
+Choose a folder containing PNG or JPEG screenshots, then click
+"Import screenshots". Folder selection includes subfolders.
+
+The app validates and saves supported images, extracts their text,
+and returns a JSON summary. Web imports are not yet connected
+to database storage or search.
+
+Uploads are stored locally in data/uploads and excluded from Git.
+The total upload request is currently limited to 50 MiB.
+
 ## Run tests
 
 From the project folder, run:
