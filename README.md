@@ -80,3 +80,13 @@ Activate it in Windows PowerShell:
 
 Private screenshots and generated data belong in the data/ folder,
 which is excluded from Git.
+
+## Run tests
+
+From the project folder, run:
+
+    python -m unittest discover -s tests -v
+
+Tests cover file fingerprints and database updates.
+They use temporary files and a temporary database,
+without modifying your personal screenshots or database.
