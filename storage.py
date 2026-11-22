@@ -7,7 +7,7 @@ DATABASE_PATH = Path(__file__).parent / "data" / "screenshots.db"
 
 
 def initialize_database() -> None:
-    """Create the table and add any missing fingerprint column."""
+    """Create the screenshots table and add missing columns."""
     DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     with closing(sqlite3.connect(DATABASE_PATH)) as connection:
@@ -18,7 +18,8 @@ def initialize_database() -> None:
                     file_path TEXT NOT NULL UNIQUE,
                     extracted_text TEXT NOT NULL,
                     indexed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    file_hash TEXT
+                    file_hash TEXT,
+                    collection_id TEXT NOT NULL DEFAULT 'local'
                 )
             """)
 
@@ -34,12 +35,25 @@ def initialize_database() -> None:
                     "ALTER TABLE screenshots ADD COLUMN file_hash TEXT"
                 )
 
+            if "collection_id" not in columns:
+                connection.execute("""
+                    ALTER TABLE screenshots
+                    ADD COLUMN collection_id TEXT NOT NULL DEFAULT 'local'
+                """)
+
+            connection.execute("""
+                CREATE INDEX IF NOT EXISTS
+                    idx_screenshots_collection_hash
+                ON screenshots (collection_id, file_hash)
+            """)
+
 def save_screenshot(
     image_path: Path,
     lines: list[str],
     file_hash: str,
+    collection_id: str = "local",
 ) -> None:
-    """Save OCR text and the fingerprint of the processed image."""
+    """Save OCR text and its fingerprint within a collection."""
     file_path = str(image_path.resolve())
     extracted_text = "\n".join(lines)
 
@@ -48,15 +62,16 @@ def save_screenshot(
             connection.execute(
                 """
                 INSERT INTO screenshots (
-                    file_path, extracted_text, file_hash
+                    file_path, extracted_text, file_hash, collection_id
                 )
-                VALUES (?, ?, ?)
+                VALUES (?, ?, ?, ?)
                 ON CONFLICT(file_path) DO UPDATE SET
                     extracted_text = excluded.extracted_text,
                     file_hash = excluded.file_hash,
                     indexed_at = CURRENT_TIMESTAMP
+                WHERE screenshots.collection_id = excluded.collection_id
                 """,
-                (file_path, extracted_text, file_hash),
+                (file_path, extracted_text, file_hash, collection_id),
             )
 
 def is_screenshot_unchanged(image_path: Path, file_hash: str) -> bool:
@@ -73,8 +88,11 @@ def is_screenshot_unchanged(image_path: Path, file_hash: str) -> bool:
 
     return row is not None and row[0] == file_hash
 
-def search_screenshots(query: str) -> list[tuple[int, str]]:
-    """Find screenshots containing the query, ignoring letter case."""
+def search_screenshots(
+    query: str,
+    collection_id: str = "local",
+) -> list[tuple[int, str]]:
+    """Find matching screenshots within one collection."""
     query = query.strip()
 
     if not query:
@@ -85,24 +103,30 @@ def search_screenshots(query: str) -> list[tuple[int, str]]:
             """
             SELECT id, file_path
             FROM screenshots
-            WHERE instr(lower(extracted_text), lower(?)) > 0
+            WHERE collection_id = ?
+              AND instr(lower(extracted_text), lower(?)) > 0
             ORDER BY id
             """,
-            (query,),
+            (collection_id, query),
         ).fetchall()
 
-        columns = {
-            row[1]
-            for row in connection.execute(
-                "PRAGMA table_info(screenshots)"
-            ).fetchall()
-        }
-
-        if "file_hash" not in columns:
-            connection.execute(
-                "ALTER TABLE screenshots ADD COLUMN file_hash TEXT"
-            )
-
-        connection.commit()
-
     return rows
+
+def find_screenshot_by_hash(
+    file_hash: str,
+    collection_id: str,
+) -> int | None:
+    """Return an existing screenshot ID for this content and collection."""
+    with closing(sqlite3.connect(DATABASE_PATH)) as connection:
+        row = connection.execute(
+            """
+            SELECT id
+            FROM screenshots
+            WHERE collection_id = ? AND file_hash = ?
+            ORDER BY id
+            LIMIT 1
+            """,
+            (collection_id, file_hash),
+        ).fetchone()
+
+    return None if row is None else row[0]

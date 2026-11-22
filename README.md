@@ -64,6 +64,15 @@ OCR is skipped.
 New or changed files are processed and saved.
 Identical files at different paths are still stored separately.
 
+### Collections
+
+Screenshots are stored within collections. Searches and content-hash
+lookups are scoped to a collection. Existing command-line scripts use
+the default "local" collection.
+
+Tests cover collection separation alongside fingerprints and record updates.
+Web imports are not yet connected to collection storage.
+
 ## Development setup
 
 Requires Python 3.11.
