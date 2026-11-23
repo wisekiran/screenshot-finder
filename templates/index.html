@@ -3,31 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screenshot Finder</title>
+    <title>Screenshot Finder — You have receipts.</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Screenshot Finder</h1>
-    <p>Find information buried in your screenshots.</p>
+    <div class="shell">
+        <nav aria-label="Main navigation">
+            <a class="brand" href="{{ url_for('home') }}">
+                <span class="brand-icon" aria-hidden="true">⌗</span>
+                screenshot finder
+            </a>
+            <span class="nav-note">CAMERA ROLL COLD CASES</span>
+        </nav>
 
-    <form action="/import" method="post" enctype="multipart/form-data">
-        <label for="screenshots">Choose your screenshots folder:</label>
+        <main>
+            <header class="hero">
+                <span class="stamp">A screenshot is not a filing system.</span>
 
-        <input
-            id="screenshots"
-            name="screenshots"
-            type="file"
-            webkitdirectory
-            multiple
-            required
-        >
+                <h1>You have receipts.<br><em>Somewhere.</em></h1>
 
-        <button type="submit">Import screenshots</button>
-    </form>
+                <p class="intro">
+                    You took a screenshot so you wouldn’t forget.
+                    How’s that going?
+                </p>
 
-<p>Importing sends the files in your selected folder to this app.</p>
+                <p class="description">
+                    Find the restaurant, recipe, or thing you were definitely
+                    going to come back to. Search the text in your screenshots.
+                </p>
+            </header>
 
-    <p>
-        Your browser may ask you to confirm the folder selection.
-    </p>
+            <div class="workspace">
+                <section class="panel">
+                    <div class="panel-label">
+                        <span>EXHIBIT A</span>
+                        <span aria-hidden="true">↙</span>
+                    </div>
+
+                    <h2>Hand over the evidence.</h2>
+                    <p>
+                        Choose your screenshots folder. We’ll extract the
+                        text so you can search without opening every image.
+                    </p>
+
+                    <form
+                        action="{{ url_for('import_screenshots') }}"
+                        method="post"
+                        enctype="multipart/form-data"
+                    >
+                        <label for="screenshots">Screenshots folder</label>
+
+                        <input
+                            id="screenshots"
+                            name="screenshots"
+                            type="file"
+                            webkitdirectory
+                            multiple
+                            required
+                            aria-describedby="upload-note"
+                        >
+
+                        <button type="submit">File the evidence ↗</button>
+
+                        <p id="upload-note" class="fine-print">
+                            PNG & JPEG · Maximum 50 MiB per import.
+                            Folder selection includes subfolders.
+                            Selected files are uploaded to the app;
+                            supported images are stored and processed.
+                        </p>
+                    </form>
+                </section>
+
+                <section class="panel panel-yellow">
+                    <div class="panel-label">
+                        <span>THE INVESTIGATION</span>
+                        <span aria-hidden="true">⌕</span>
+                    </div>
+
+                    <h2>Give us a clue.</h2>
+                    <p>
+                        Remember a name? A place? Half a sentence?
+                        Start with a word from an imported screenshot.
+                    </p>
+
+                    <form action="{{ url_for('search') }}" method="get">
+                        <label for="query">What do you remember?</label>
+
+                        <input
+                            id="query"
+                            name="q"
+                            type="search"
+                            placeholder="pizza, pottery, Montréal…"
+                            required
+                            aria-describedby="search-note"
+                        >
+
+                        <button type="submit">Track it down ↗</button>
+
+                        <p id="search-note" class="fine-print">
+                            Searches matching text in this browser’s collection.
+                            Try a word or exact phrase visible in the image.
+                        </p>
+                    </form>
+                </section>
+            </div>
+
+            <footer>
+                <span>For the “I know I saved it” crowd.</span>
+                <span class="footer-mark" aria-hidden="true">[ FOUND / SAVED ]</span>
+            </footer>
+        </main>
+    </div>
 </body>
 </html>

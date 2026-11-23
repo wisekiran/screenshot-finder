@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results for {{ query }} — Screenshot Finder</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="shell">
+        <nav aria-label="Main navigation">
+            <a class="brand" href="{{ url_for('home') }}">
+                <span class="brand-icon" aria-hidden="true">⌗</span>
+                screenshot finder
+            </a>
+            <a class="nav-link" href="{{ url_for('home') }}">
+                Import more ↗
+            </a>
+        </nav>
+
+        <main>
+            <header class="hero results-hero">
+                <span class="stamp">SEARCH COMPLETE</span>
+                <h1>Look what<br><em>turned up.</em></h1>
+            </header>
+
+            <form
+                class="results-search"
+                action="{{ url_for('search') }}"
+                method="get"
+            >
+                <label for="query">Follow another lead</label>
+                <div class="search-bar">
+                    <input
+                        id="query"
+                        name="q"
+                        type="search"
+                        value="{{ query }}"
+                        required
+                    >
+                    <button type="submit">Track it down ↗</button>
+                </div>
+            </form>
+
+            <div class="results-summary">
+                <p>
+                    {{ screenshot_ids | length }}
+                    {% if screenshot_ids | length == 1 %}
+                        match
+                    {% else %}
+                        matches
+                    {% endif %}
+                    for <strong>“{{ query }}”</strong>
+                </p>
+
+                {% if screenshot_ids %}
+                    <span class="summary-note">CLICK A RECEIPT TO OPEN</span>
+                {% endif %}
+            </div>
+
+            {% if screenshot_ids %}
+                <div class="gallery">
+                    {% for screenshot_id in screenshot_ids %}
+                        <figure class="receipt">
+                            <div class="receipt-heading" aria-hidden="true">
+                                SCREENSHOT RECOVERED
+                            </div>
+
+                            <a
+                                class="image-link"
+                                href="{{ url_for('screenshot_image', screenshot_id=screenshot_id) }}"
+                                aria-label="Open matching screenshot {{ loop.index }}"
+                            >
+                                <img
+                                    src="{{ url_for('screenshot_image', screenshot_id=screenshot_id) }}"
+                                    alt="Matching screenshot {{ loop.index }} for {{ query }}"
+                                    loading="lazy"
+                                >
+                            </a>
+
+                            <figcaption>
+                                <span>EVIDENCE #{{ screenshot_id }}</span>
+                                <span>OPEN ORIGINAL ↗</span>
+                            </figcaption>
+                        </figure>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <section class="empty-state">
+                    <span class="empty-symbol" aria-hidden="true">?</span>
+                    <h2>The trail went cold.</h2>
+                    <p>
+                        Try a shorter phrase or a different word from the image.
+                        If you haven’t imported its folder yet, start there.
+                    </p>
+                    <a class="text-link" href="{{ url_for('home') }}">
+                        Back to the evidence desk ↗
+                    </a>
+                </section>
+            {% endif %}
+
+            <footer>
+                <span>For the “I know I saved it” crowd.</span>
+                <a href="{{ url_for('home') }}">Back to the desk ↗</a>
+            </footer>
+        </main>
+    </div>
+</body>
+</html>

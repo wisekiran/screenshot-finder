@@ -130,3 +130,20 @@ def find_screenshot_by_hash(
         ).fetchone()
 
     return None if row is None else row[0]
+
+def get_screenshot_path(
+    screenshot_id: int,
+    collection_id: str,
+) -> Path | None:
+    """Find an image path only within the requested collection."""
+    with closing(sqlite3.connect(DATABASE_PATH)) as connection:
+        row = connection.execute(
+            """
+            SELECT file_path
+            FROM screenshots
+            WHERE id = ? AND collection_id = ?
+            """,
+            (screenshot_id, collection_id),
+        ).fetchone()
+
+    return None if row is None else Path(row[0])
