@@ -536,3 +536,22 @@ footer {
         border-top: 1px dashed var(--ink);
     }
 }
+
+button:disabled {
+    background: #705b40;
+    cursor: wait;
+    box-shadow: none;
+    transform: none;
+}
+
+.import-status {
+    margin: 12px 0 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
+.import-status:empty {
+    display: none;
+}

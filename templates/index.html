@@ -6,6 +6,10 @@
     <title>Screenshot Finder — You have receipts.</title>
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+    <script
+        src="{{ url_for('static', filename='import.js') }}"
+        defer
+    ></script>
 </head>
 <body>
     <div class="shell">
@@ -48,6 +52,7 @@
                     </p>
 
                     <form
+                        id="import-form"
                         action="{{ url_for('import_screenshots') }}"
                         method="post"
                         enctype="multipart/form-data"
@@ -65,6 +70,13 @@
                         >
 
                         <button type="submit">File the evidence ↗</button>
+
+                        <p
+                            id="import-status"
+                            class="import-status"
+                            role="status"
+                            aria-live="polite"
+                        ></p>
 
                         <p id="upload-note" class="fine-print">
                             PNG & JPEG · Maximum 50 MiB per import.
