@@ -1,5 +1,14 @@
 from pathlib import Path
-from flask import Flask, abort, render_template, request, send_file, session
+from flask import (
+    Flask,
+    abort,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    session,
+    url_for,
+)
 from uuid import uuid4
 from uploads import UPLOAD_ROOT, save_uploaded_image
 from rapidocr import RapidOCR
@@ -109,12 +118,13 @@ def import_screenshots():
             "line_count": len(lines),
         })
 
-    return {
+    session["last_import"] = {
         "processed": len(results),
         "duplicates_skipped": duplicate_count,
         "rejected": rejected_count,
-        "results": results,
     }
+
+    return redirect(url_for("import_complete"), code=303)
 
 @app.get("/search")
 def search():
@@ -148,6 +158,19 @@ def screenshot_image(screenshot_id: int):
     response.headers["Cache-Control"] = "private, no-store"
     return response
 
+@app.get("/import/complete")
+def import_complete():
+    summary = session.get("last_import")
+
+    if summary is None:
+        return redirect(url_for("home"))
+
+    return render_template(
+        "import_result.html",
+        processed=summary["processed"],
+        duplicates_skipped=summary["duplicates_skipped"],
+        rejected=summary["rejected"],
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)

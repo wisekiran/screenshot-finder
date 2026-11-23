@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import complete — Screenshot Finder</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="shell">
+        <nav aria-label="Main navigation">
+            <a class="brand" href="{{ url_for('home') }}">
+                <span class="brand-icon" aria-hidden="true">⌗</span>
+                screenshot finder
+            </a>
+            <a class="nav-link" href="{{ url_for('home') }}">
+                Back to the desk ↗
+            </a>
+        </nav>
+
+        <main>
+            <header class="hero results-hero">
+                <span class="stamp">IMPORT COMPLETE</span>
+
+                {% if processed > 0 %}
+                    <h1>Evidence<br><em>filed.</em></h1>
+                    <p class="intro">
+                        Your new screenshots are ready to search.
+                    </p>
+                {% elif duplicates_skipped > 0 %}
+                    <h1>Seen these.<br><em>Kept the originals.</em></h1>
+                    <p class="intro">
+                        These screenshots were already in your collection.
+                        No need to process them twice.
+                    </p>
+                {% else %}
+                    <h1>Nothing<br><em>filed.</em></h1>
+                    <p class="intro">
+                        We couldn’t add any screenshots from this import.
+                        Try a folder containing valid PNG or JPEG images.
+                    </p>
+                {% endif %}
+            </header>
+
+            <section class="import-summary" aria-label="Import summary">
+                <div class="summary-item">
+                    <strong>{{ processed }}</strong>
+                    <span>NEWLY INDEXED</span>
+                </div>
+
+                <div class="summary-item">
+                    <strong>{{ duplicates_skipped }}</strong>
+                    <span>DUPLICATES SKIPPED</span>
+                </div>
+
+                <div class="summary-item">
+                    <strong>{{ rejected }}</strong>
+                    <span>INVALID IMAGES</span>
+                </div>
+            </section>
+
+            <section class="import-next">
+                <h2>Time to follow a lead.</h2>
+                <p class="description">
+                    Search for a word or phrase from your screenshots.
+                </p>
+
+                <form action="{{ url_for('search') }}" method="get">
+                    <label for="query">What are you looking for?</label>
+
+                    <div class="search-bar">
+                        <input
+                            id="query"
+                            name="q"
+                            type="search"
+                            placeholder="pizza, pottery, Montréal…"
+                            required
+                        >
+                        <button type="submit">Track it down ↗</button>
+                    </div>
+                </form>
+
+                <a class="text-link import-again"
+                   href="{{ url_for('home') }}">
+                    Import another folder ↗
+                </a>
+            </section>
+
+            <footer>
+                <span>For the “I know I saved it” crowd.</span>
+                <span class="footer-mark">[ FOUND / SAVED ]</span>
+            </footer>
+        </main>
+    </div>
+</body>
+</html>
