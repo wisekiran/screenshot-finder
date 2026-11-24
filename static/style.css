@@ -555,3 +555,32 @@ button:disabled {
 .import-status:empty {
     display: none;
 }
+
+.collection-controls {
+    margin-bottom: 48px;
+    padding-top: 24px;
+    border-top: 1px dashed var(--ink);
+}
+
+.collection-controls p {
+    max-width: 560px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.delete-confirmation {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 560px;
+    line-height: 1.5;
+}
+
+.delete-confirmation input {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    min-height: 0;
+    margin: 2px 0 0;
+}

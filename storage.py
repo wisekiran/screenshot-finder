@@ -147,3 +147,26 @@ def get_screenshot_path(
         ).fetchone()
 
     return None if row is None else Path(row[0])
+
+def delete_collection(collection_id: str) -> int:
+    """Remove a collection's image files and database records."""
+    with closing(sqlite3.connect(DATABASE_PATH)) as connection:
+        rows = connection.execute(
+            """
+            SELECT file_path
+            FROM screenshots
+            WHERE collection_id = ?
+            """,
+            (collection_id,),
+        ).fetchall()
+
+        for (file_path,) in rows:
+            Path(file_path).unlink(missing_ok=True)
+
+        with connection:
+            connection.execute(
+                "DELETE FROM screenshots WHERE collection_id = ?",
+                (collection_id,),
+            )
+
+    return len(rows)

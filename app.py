@@ -22,6 +22,7 @@ from storage import (
     save_screenshot,
     search_screenshots,
     get_screenshot_path,
+    delete_collection,
 )
 
 app = Flask(__name__)
@@ -215,6 +216,34 @@ def internal_error(error):
             "the import; existing duplicates will be skipped."
         ),
     ), 500
+
+@app.context_processor
+def provide_form_token():
+    if "form_token" not in session:
+        session["form_token"] = secrets.token_hex(32)
+
+    return {"form_token": session["form_token"]}
+
+
+@app.post("/collection/delete")
+def delete_my_collection():
+    expected_token = session.get("form_token")
+    submitted_token = request.form.get("form_token", "")
+
+    if (
+        not expected_token
+        or not secrets.compare_digest(expected_token, submitted_token)
+    ):
+        abort(400)
+
+    collection_id = session.get("collection_id")
+
+    if collection_id:
+        initialize_database()
+        delete_collection(collection_id)
+
+    session.clear()
+    return redirect(url_for("home"), code=303)
 
 
 if __name__ == "__main__":

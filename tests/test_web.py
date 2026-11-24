@@ -185,6 +185,82 @@ class WebTests(unittest.TestCase):
             [],
         )
 
+    def test_delete_removes_only_current_collection(self):
+        self.upload_image()
+
+        with self.client.session_transaction() as browser_session:
+            collection_id = browser_session["collection_id"]
+            browser_session["form_token"] = "valid-test-token"
+
+        screenshot_id = storage.search_screenshots(
+            "pizza", collection_id
+        )[0][0]
+        image_path = storage.get_screenshot_path(
+            screenshot_id, collection_id
+        )
+
+        other_browser = web.app.test_client()
+        self.upload_image(other_browser)
+
+        with other_browser.session_transaction() as browser_session:
+            other_collection = browser_session["collection_id"]
+
+        other_id = storage.search_screenshots(
+            "pizza", other_collection
+        )[0][0]
+
+        response = self.client.post(
+            "/collection/delete",
+            data={"form_token": "valid-test-token"},
+        )
+
+        self.assertEqual(response.status_code, 303)
+        self.assertFalse(image_path.exists())
+        self.assertEqual(
+            storage.search_screenshots("pizza", collection_id), []
+        )
+        self.assertEqual(
+            self.client.get(f"/screenshots/{screenshot_id}").status_code,
+            404,
+        )
+
+        # Another visitor's collection remains available.
+        self.assertEqual(
+            len(storage.search_screenshots("pizza", other_collection)),
+            1,
+        )
+        other_image = other_browser.get(f"/screenshots/{other_id}")
+        try:
+            self.assertEqual(other_image.status_code, 200)
+        finally:
+            other_image.close()
+
+    def test_delete_rejects_missing_or_wrong_token(self):
+        self.upload_image()
+
+        with self.client.session_transaction() as browser_session:
+            collection_id = browser_session["collection_id"]
+            browser_session["form_token"] = "expected-token"
+
+        for submitted_data in [
+            {},
+            {"form_token": "wrong-token"},
+        ]:
+            with self.subTest(submitted_data=submitted_data):
+                response = self.client.post(
+                    "/collection/delete",
+                    data=submitted_data,
+                )
+                self.assertEqual(response.status_code, 400)
+
+        matches = storage.search_screenshots("pizza", collection_id)
+        self.assertEqual(len(matches), 1)
+
+        image_path = storage.get_screenshot_path(
+            matches[0][0], collection_id
+        )
+        self.assertTrue(image_path.is_file())
+
 
 if __name__ == "__main__":
     unittest.main()

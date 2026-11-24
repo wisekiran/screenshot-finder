@@ -120,6 +120,24 @@
                     </form>
                 </section>
             </div>
+            <section class="collection-controls">
+                <h2>Shred the evidence.</h2>
+                <p>
+                    Finished here? Permanently delete the screenshots and extracted
+                    text in this browser’s current collection.
+                </p>
+
+                <form action="{{ url_for('delete_my_collection') }}" method="post">
+                    <input type="hidden" name="form_token" value="{{ form_token }}">
+
+                    <label class="delete-confirmation">
+                        <input type="checkbox" required>
+                        Yes, delete my current collection. This cannot be undone.
+                    </label>
+
+                    <button type="submit">Delete my screenshots</button>
+                </form>
+            </section>
 
             <footer>
                 <span>For the “I know I saved it” crowd.</span>
