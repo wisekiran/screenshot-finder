@@ -115,6 +115,54 @@ class StorageTests(unittest.TestCase):
                             matches[0][0],
                         )
 
+    def test_expiry_preserves_recent_and_local_records(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder)
+
+            with patch.object(storage, "DATABASE_PATH", root / "test.db"):
+                storage.initialize_database()
+
+                for filename, collection in [
+                    ("expired.png", "web-old"),
+                    ("recent.png", "web-new"),
+                    ("local.png", "local"),
+                ]:
+                    image = root / filename
+                    image.write_bytes(b"test contents")
+                    storage.save_screenshot(
+                        image, ["Pizza"], filename, collection
+                    )
+
+                with closing(sqlite3.connect(storage.DATABASE_PATH)) as connection:
+                    with connection:
+                        connection.execute(
+                            """
+                            UPDATE screenshots
+                            SET indexed_at = datetime('now', '-48 hours')
+                            WHERE collection_id IN ('web-old', 'local')
+                            """
+                        )
+
+                self.assertEqual(storage.expire_web_uploads(), 1)
+                self.assertTrue((root / "expired.png").exists())
+
+                self.assertEqual(
+                    storage.expire_web_uploads(dry_run=False), 1
+                )
+                self.assertFalse((root / "expired.png").exists())
+                self.assertTrue((root / "recent.png").exists())
+                self.assertTrue((root / "local.png").exists())
+
+                self.assertEqual(
+                    storage.search_screenshots("pizza", "web-old"), []
+                )
+                self.assertEqual(
+                    len(storage.search_screenshots("pizza", "web-new")), 1
+                )
+                self.assertEqual(
+                    len(storage.search_screenshots("pizza", "local")), 1
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

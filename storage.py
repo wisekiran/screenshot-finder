@@ -170,3 +170,40 @@ def delete_collection(collection_id: str) -> int:
             )
 
     return len(rows)
+
+def expire_web_uploads(
+    max_age_hours: int = 24,
+    dry_run: bool = True,
+) -> int:
+    """Find or delete expired web images and their database records."""
+    if max_age_hours < 1:
+        raise ValueError("Expiry must be at least one hour.")
+
+    modifier = f"-{max_age_hours} hours"
+
+    with closing(sqlite3.connect(DATABASE_PATH)) as connection:
+        with connection:
+            # Prevent another writer from updating selected records
+            # while cleanup is removing their files.
+            connection.execute("BEGIN IMMEDIATE")
+
+            rows = connection.execute(
+                """
+                SELECT id, file_path
+                FROM screenshots
+                WHERE collection_id != 'local'
+                  AND indexed_at <= datetime('now', ?)
+                """,
+                (modifier,),
+            ).fetchall()
+
+            if not dry_run:
+                for screenshot_id, file_path in rows:
+                    Path(file_path).unlink(missing_ok=True)
+
+                    connection.execute(
+                        "DELETE FROM screenshots WHERE id = ?",
+                        (screenshot_id,),
+                    )
+
+    return len(rows)
