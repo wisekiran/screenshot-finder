@@ -74,7 +74,11 @@ def import_screenshots():
     ]
 
     if not image_files:
-        return "No supported images found. Choose PNG or JPEG files.", 400
+        return render_template(
+            "error.html",
+            title="No evidence found.",
+            message="Choose a folder containing PNG or JPEG screenshots.",
+        ), 400
 
     initialize_database()
 
@@ -104,7 +108,12 @@ def import_screenshots():
             duplicate_count += 1
             continue
 
-        lines = extract_text(image_path, get_ocr_engine())
+        try:
+            lines = extract_text(image_path, get_ocr_engine())
+        except Exception:
+            image_path.unlink(missing_ok=True)
+            app.logger.exception("OCR failed during screenshot import")
+            abort(500)
 
         save_screenshot(
             image_path,
@@ -172,5 +181,41 @@ def import_complete():
         rejected=summary["rejected"],
     )
 
+@app.errorhandler(413)
+def upload_too_large(error):
+    return render_template(
+        "error.html",
+        title="Too much evidence.",
+        message=(
+            "This import exceeds the 50 MiB limit. "
+            "Split your screenshots into smaller folders and try again."
+        ),
+    ), 413
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template(
+        "error.html",
+        title="The trail went cold.",
+        message=(
+            "This page or screenshot isn’t available in your collection."
+        ),
+    ), 404
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template(
+        "error.html",
+        title="Something didn’t click.",
+        message=(
+            "We couldn’t finish that request. Some screenshots may already "
+            "have been indexed. You can search your collection or retry "
+            "the import; existing duplicates will be skipped."
+        ),
+    ), 500
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=os.environ.get("FLASK_DEBUG") == "1")
